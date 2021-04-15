@@ -1,0 +1,184 @@
+#******************************************************************#
+# 테스트용, 삭제 예정
+#******************************************************************#
+
+version: '2'
+
+volumes:
+  orderer0:
+  orderer1:
+  orderer2:
+  peer0.hmg-kor:
+  peer1.hmg-kor:
+  peer2.hmg-kor:
+
+networks:
+  hmg-network:
+
+services:
+
+  orderer0:
+    container_name: orderer0
+    extends:
+      file: common-base.yaml
+      service: orderer-base
+    environment:
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:9323
+      - ORDERER_METRICS_PROVIDER=prometheus
+    volumes:
+      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../organizations/ordererOrganizations//orderers/orderer0/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations//orderers/orderer0/tls/:/var/hyperledger/orderer/tls
+      - orderer0:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+      - 9323:9323
+    networks:
+      - hmg-network
+
+  orderer1:
+    container_name: orderer1
+    extends:
+      file: common-base.yaml
+      service: orderer-base
+    environment:
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:10323
+      - ORDERER_METRICS_PROVIDER=prometheus
+    volumes:
+      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../organizations/ordererOrganizations//orderers/orderer1/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations//orderers/orderer1/tls/:/var/hyperledger/orderer/tls
+      - orderer1:/var/hyperledger/production/orderer
+    ports:
+      - 8050:7050
+      - 10323:10323
+    networks:
+      - hmg-network
+
+  orderer2:
+    container_name: orderer2
+    extends:
+      file: common-base.yaml
+      service: orderer-base
+    environment:
+      - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:11323
+      - ORDERER_METRICS_PROVIDER=prometheus
+    volumes:
+      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../organizations/ordererOrganizations//orderers/orderer2/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations//orderers/orderer2/tls/:/var/hyperledger/orderer/tls
+      - orderer2:/var/hyperledger/production/orderer
+    ports:
+      - 9050:7050
+      - 11323:11323
+    networks:
+      - hmg-network
+
+  peer0.hmg-kor:
+    container_name: peer0.hmg-kor
+    extends:
+      file: common-base.yaml
+      service: peer-base
+    environment:
+      # Peer specific variables
+      - CORE_PEER_ID=peer0.hmg-kor
+      - CORE_PEER_ADDRESS=peer0.hmg-kor:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.hmg-kor:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.hmg-kor:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.hmg-kor:7051
+      # Prometheus variables
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:12323
+      - CORE_METRICS_PROVIDER=prometheus
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer0.hmg-kor/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer0.hmg-kor/tls:/etc/hyperledger/fabric/tls
+      - peer0.hmg-kor:/var/hyperledger/production
+    ports:
+      - 7051:7051
+      - 12323:12323
+    networks:
+      - hmg-network
+
+  peer1.hmg-kor:
+    container_name: peer1.hmg-kor
+    extends:
+      file: common-base.yaml
+      service: peer-base
+    environment:
+      # Peer specific variables
+      - CORE_PEER_ID=peer1.hmg-kor
+      - CORE_PEER_ADDRESS=peer1.hmg-kor:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.hmg-kor:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.hmg-kor:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.hmg-kor:7051
+      # Prometheus variables
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:13323
+      - CORE_METRICS_PROVIDER=prometheus
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer1.hmg-kor/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer1.hmg-kor/tls:/etc/hyperledger/fabric/tls
+      - peer1.hmg-kor:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 8051:7051
+      - 13323:13323
+    networks:
+      - hmg-network
+
+  peer2.hmg-kor:
+    container_name: peer2.hmg-kor
+    extends:
+      file: common-base.yaml
+      service: peer-base
+    environment:
+      # Peer specific variables
+      - CORE_PEER_ID=peer2.hmg-kor
+      - CORE_PEER_ADDRESS=peer2.hmg-kor:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer2.hmg-kor:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.hmg-kor:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2.hmg-kor:7051
+      # Prometheus variables
+      - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:14323
+      - CORE_METRICS_PROVIDER=prometheus
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer2.hmg-kor/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer2.hmg-kor/tls:/etc/hyperledger/fabric/tls
+      - peer2.hmg-kor:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 9051:7051
+      - 14323:14323
+    networks:
+      - hmg-network
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
+      - ../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - ../channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+      - ../chaincode:/opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode
+    networks:
+      - hmg-network
+

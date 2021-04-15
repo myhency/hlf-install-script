@@ -1,0 +1,11 @@
+[
+ {
+   "name": "sampleCollection",
+   "policy": "OR('HmgKorMSP.member')",
+   "requiredPeerCount": 1,
+   "maxPeerCount": 1,
+   "blockToLive":10000,
+   "memberOnlyRead": true,
+   "memberOnlyWrite": true
+  }
+]

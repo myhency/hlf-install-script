@@ -1,0 +1,202 @@
+#******************************************************************#
+# 파일명 : docker-compose-peer.yaml
+# 작성자 : 김준기 (크리에이티브힐)
+# 작성일 : 2021.03.29
+#
+# Docker Compose Peer / Orderer 설정 파일
+#
+# Copyright IBM Corp. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#******************************************************************#
+
+version: '2'
+
+volumes:
+  orderer0:
+  orderer1:
+  orderer2:
+  peer0.hmg-kor:
+  peer1.hmg-kor:
+  peer2.hmg-kor:
+
+networks:
+  hmg-network:
+
+services:
+
+  orderer0:
+    container_name: orderer0
+    extends:
+      file: common-base.yaml
+      service: orderer-base
+    volumes:
+      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../organizations/ordererOrganizations//orderers/orderer0/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations//orderers/orderer0/tls/:/var/hyperledger/orderer/tls
+      - orderer0:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+    networks:
+      - hmg-network
+    extra_hosts:
+      - orderer1:${VM2_IP}
+      - orderer2:${VM3_IP}
+      - peer1.hmg-kor:${VM2_IP}
+      - peer2.hmg-kor:${VM3_IP}
+
+  orderer1:
+    container_name: orderer1
+    extends:
+      file: common-base.yaml
+      service: orderer-base
+    volumes:
+      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../organizations/ordererOrganizations//orderers/orderer1/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations//orderers/orderer1/tls/:/var/hyperledger/orderer/tls
+      - orderer1:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+    networks:
+      - hmg-network
+    extra_hosts:
+      - orderer0:${VM1_IP}
+      - orderer2:${VM3_IP}
+      - peer0.hmg-kor:${VM1_IP}
+      - peer2.hmg-kor:${VM3_IP}
+
+  orderer2:
+    container_name: orderer2
+    extends:
+      file: common-base.yaml
+      service: orderer-base
+    volumes:
+      - ../system-genesis-block/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ../organizations/ordererOrganizations//orderers/orderer2/msp:/var/hyperledger/orderer/msp
+      - ../organizations/ordererOrganizations//orderers/orderer2/tls/:/var/hyperledger/orderer/tls
+      - orderer2:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+    networks:
+      - hmg-network
+    extra_hosts:
+      - orderer0:${VM1_IP}
+      - orderer1:${VM2_IP}
+      - peer0.hmg-kor:${VM1_IP}
+      - peer1.hmg-kor:${VM2_IP}
+
+  peer0.hmg-kor:
+    container_name: peer0.hmg-kor
+    extends:
+      file: common-base.yaml
+      service: peer-base
+    environment:
+      # Peer specific variabes
+      - CORE_PEER_ID=peer0.hmg-kor
+      - CORE_PEER_ADDRESS=peer0.hmg-kor:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.hmg-kor:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.hmg-kor:7051 peer2.hmg-kor:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.hmg-kor:7051
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer0.hmg-kor/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer0.hmg-kor/tls:/etc/hyperledger/fabric/tls
+      - peer0.hmg-kor:/var/hyperledger/production
+    ports:
+      - 7051:7051
+    networks:
+      - hmg-network
+    extra_hosts:
+      - orderer1:${VM2_IP}
+      - orderer2:${VM3_IP}
+      - peer1.hmg-kor:${VM2_IP}
+      - peer2.hmg-kor:${VM3_IP}
+
+  peer1.hmg-kor:
+    container_name: peer1.hmg-kor
+    extends:
+      file: common-base.yaml
+      service: peer-base
+    environment:
+      # Peer specific variabes
+      - CORE_PEER_ID=peer1.hmg-kor
+      - CORE_PEER_ADDRESS=peer1.hmg-kor:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.hmg-kor:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.hmg-kor:7051 peer2.hmg-kor:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.hmg-kor:7051
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer1.hmg-kor/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer1.hmg-kor/tls:/etc/hyperledger/fabric/tls
+      - peer1.hmg-kor:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 7051:7051
+    networks:
+      - hmg-network
+    extra_hosts:
+      - orderer0:${VM1_IP}
+      - orderer2:${VM3_IP}
+      - peer0.hmg-kor:${VM1_IP}
+      - peer2.hmg-kor:${VM3_IP}
+
+  peer2.hmg-kor:
+    container_name: peer2.hmg-kor
+    extends:
+      file: common-base.yaml
+      service: peer-base
+    environment:
+      # Peer specific variabes
+      - CORE_PEER_ID=peer2.hmg-kor
+      - CORE_PEER_ADDRESS=peer2.hmg-kor:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer2.hmg-kor:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.hmg-kor:7051 peer1.hmg-kor:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2.hmg-kor:7051
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer2.hmg-kor/msp:/etc/hyperledger/fabric/msp
+      - ../organizations/peerOrganizations/hmg-kor/peers/peer2.hmg-kor/tls:/etc/hyperledger/fabric/tls
+      - peer2.hmg-kor:/var/hyperledger/production
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    ports:
+      - 7051:7051
+    networks:
+      - hmg-network
+    extra_hosts:
+      - orderer0:${VM1_IP}
+      - orderer1:${VM2_IP}
+      - peer0.hmg-kor:${VM1_IP}
+      - peer1.hmg-kor:${VM2_IP}
+
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
+      - ../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - ../channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+      - ../chaincode:/opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode
+    networks:
+      - hmg-network
+    extra_hosts:
+      - peer1.hmg-kor:${VM2_IP}
+      - peer2.hmg-kor:${VM3_IP}
+      - orderer1:${VM2_IP}
+      - orderer2:${VM3_IP}

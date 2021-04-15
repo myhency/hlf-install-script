@@ -1,0 +1,70 @@
+#******************************************************************#
+# 파일명 : docker-compose-ca.yaml
+# 작성자 : 김준기 (크리에이티브힐)
+# 작성일 : 2021.03.29
+#
+# Docker Compose CA Server 설정 파일
+#
+# Copyright IBM Corp. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+#******************************************************************#
+
+version: '2'
+
+networks:
+  hmg-network:
+
+services:
+
+  ca.hmg-kor:
+    image: hyperledger/fabric-ca:$CA_IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.hmg-kor
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=7054
+      - FABRIC_CA_SERVER_CSR_HOSTS=ca.hmg-kor
+      - FABRIC_CA_SERVER_CSR_CN=ca.hmg-kor
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/ca.hmg-kor:/etc/hyperledger/fabric-ca-server
+    container_name: ca.hmg-kor
+    networks:
+      - hmg-network
+
+  ca.orderer-org:
+    image: hyperledger/fabric-ca:$CA_IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.orderer-org
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=8054
+      - FABRIC_CA_SERVER_CSR_HOSTS=ca.orderer-org
+      - FABRIC_CA_SERVER_CSR_CN=ca.orderer-org
+    ports:
+      - "8054:8054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../organizations/fabric-ca/ca.orderer-org:/etc/hyperledger/fabric-ca-server
+    container_name: ca.orderer-org
+    networks:
+      - hmg-network
+
+  tls-ca:
+    image: hyperledger/fabric-ca:$CA_IMAGE_TAG
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=tls-ca
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=7052
+      - FABRIC_CA_SERVER_CSR_HOSTS=tls-ca
+    ports:
+      - "7052:7052"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ../organizations/fabric-ca/tls-ca:/etc/hyperledger/fabric-ca-server
+    container_name: tls-ca
+    networks:
+      - hmg-network

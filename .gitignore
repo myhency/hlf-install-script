@@ -1,0 +1,32 @@
+# Channel Material 
+channel-artifacts/
+
+# Hmg Crypto Material
+organizations/fabric-ca/ca.hmg-kor/Issuer*
+organizations/fabric-ca/ca.hmg-kor/*.pem
+organizations/fabric-ca/ca.hmg-kor/*.db
+organizations/fabric-ca/ca.hmg-kor/msp/
+
+organizations/peerOrganizations/
+
+# Orderer Crypto Material
+organizations/fabric-ca/ca.orderer-org/Issuer*
+organizations/fabric-ca/ca.orderer-org/*.pem
+organizations/fabric-ca/ca.orderer-org/*.db
+organizations/fabric-ca/ca.orderer-org/msp/
+
+organizations/ordererOrganizations/
+
+# Tls Ca Crypto Materialca.orderer-org
+organizations/fabric-ca/tls-ca/Issuer*
+organizations/fabric-ca/tls-ca/*.pem
+organizations/fabric-ca/tls-ca/*.db
+organizations/fabric-ca/tls-ca/msp/
+
+organizations/tlsca/
+
+# Orderer System Channel Block
+system-genesis-block/
+
+# Docker compose Environment
+docker/.env

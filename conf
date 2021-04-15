@@ -1,0 +1,73 @@
+#************************************************************#
+# 파일명 : conf
+# 작성자 : 김준기 (크리에이티브힐)
+# 작성일 : 2021.03.29
+#
+# HLF 설정 파일
+#************************************************************#
+
+# STAGE 지정 [로컬 : local / 개발 : dev / 운영 : prod]
+## - docker/.env 설정과 동일하게 설정 할것.
+## - chaincode 컨테이너 삭제 시 사용
+STAGE=local
+
+# ORG 설정
+## ORG 이름 지정
+### - MSP 인증서 등록 및 발급 시 사용.
+### - 스크립트 공통 설정
+ORG_NAME="hmg-kor"
+ORDERER_NAME="orderer-org"
+
+## HLF NODE 개수 지정
+PEER_NUM=3
+ORDERER_NUM=3
+
+# CA 설정
+## TLS 서버 이름 지정
+TLS_CA="tls-ca"
+
+# HLF 네트워크 설정
+## GENESIS BLOCK / CHANNEL 설정
+CONFIGTX_PATH="config"
+GENESIS_PROFILE="HmgKorOrdererGenesis"
+CHANNEL_PROFILE="HmgKorChannel"
+SYSTEM_CHANNEL_NAME="system-channel"
+CHANNEL_NAME="test-channel"
+
+## CHAINCODE 설정
+CHAINCODE_NAME="sample"
+CHAINCODE_SRC_PATH="chaincode/sample"
+CHAINCODE_LANGUAGE="golang"
+CHAINCODE_VERSION=1.0
+CHAINCODE_SEQUENCE=1
+CHAINCODE_INIT_REQUIRED=false
+#CHAINCODE_COLLECTION_CONFIG="./chaincode/sample/collections_config.json"
+CHAINCODE_COLLECTION_CONFIG=""
+
+### 미지정 시, '/Application/Policies/Endorsement' 정책을 따름
+CHAINCODE_ENDORSEMENT_POLICY="OR('HmgKorMSP.peer')" 
+
+### 여러 ORG의 이름 지정 시, 공백으로 구분할 것(ex, "Org1 Org2")
+### Chaincode Commit 보증 Peer 지정
+CHAINCODE_COMMIT_ORGS="hmg-kor"
+
+# VM 구동 서비스
+## 서비스 여러개 지정 시, 공백으로 구분할 것
+### EX) "peer0.org1.example.com orderer.example.com"
+#CA_SERVER="tls-ca"
+#NODES="orderer0 peer0.hmg-kor couchdb0 cli"
+
+## docker-compose file 지정
+COMPOSE_FILE_PATH="$PWD/docker"
+COMPOSE_FILE_CA=${COMPOSE_FILE_PATH}/docker-compose-ca.yaml
+#COMPOSE_FILE_NODE=${COMPOSE_FILE_PATH}/docker-compose-peer.yaml
+#COMPOSE_FILE_COUCH=${COMPOSE_FILE_PATH}/docker-compose-couch.yaml
+
+##############################
+## 단일 호스트(local STAGE) ##
+##############################
+CA_SERVER="tls-ca ca.hmg-kor ca.orderer-org"
+NODES="orderer0 orderer1 orderer2 peer0.hmg-kor peer1.hmg-kor peer2.hmg-kor couchdb0 couchdb1 couchdb2 cli"
+
+COMPOSE_FILE_NODE=${COMPOSE_FILE_PATH}/docker-compose-peer-single.yaml
+COMPOSE_FILE_COUCH=${COMPOSE_FILE_PATH}/docker-compose-couch-single.yaml
